@@ -130,7 +130,7 @@ func getAreas(url string, c *Config) error {
 	// Make a get request to the base_url or c.Next_URL
 	data, err := GET(url)
 	if err != nil {
-		return fmt.Errorf("Error fetching location data:", err)
+		return fmt.Errorf("Error fetching location data: %w", err)
 	}
 	// Update the config instance URLs
 	//fmt.Printf("Prev URL: %s\nNext URL: %s\n", c.Previous_URL, c.Next_URL)

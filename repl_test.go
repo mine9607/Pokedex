@@ -14,7 +14,10 @@ func TestCleanInput(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := cleanInput(test.input)
+		actual, err := cleanInput(test.input)
+		if err != nil {
+			t.Errorf("Error returning cleaned Input")
+		}
 
 		// Add a check for the length of the slice matches the expected length
 		// if not use t.Errorf("error message") and fail the test
