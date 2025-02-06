@@ -1,16 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"time"
+
+	"github.com/mine9607/pokedexcli/internal/pokeapi"
 )
 
 func main() {
-	StartRepl(os.Stdin, os.Stdout)
-}
+	pokeClient := pokeapi.NewClient(5*time.Second, 5*time.Minute)
 
-func commandExit(config *Config) error {
-	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
-	return nil
+	config := &config{
+		pokeapiClient: pokeClient,
+		next_URL:      "",
+		previous_URL:  "",
+	}
+
+	StartRepl(os.Stdin, os.Stdout, config)
 }

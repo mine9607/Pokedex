@@ -9,9 +9,6 @@ type Cache struct {
 	cacheMap map[string]cacheEntry
 	// my code
 	mu sync.RWMutex
-
-	// solution code
-	// mux *sync.Mutex
 }
 
 type cacheEntry struct {
@@ -19,8 +16,8 @@ type cacheEntry struct {
 	val       []byte
 }
 
-func NewCache(interval time.Duration) Cache {
-	c := Cache{
+func NewCache(interval time.Duration) *Cache {
+	c := &Cache{
 		cacheMap: make(map[string]cacheEntry),
 	}
 
