@@ -13,6 +13,7 @@ func main() {
 	config := &config{
 		pokeapiClient: pokeClient,
 		next_URL:      "",
+		curr_URL:      "",
 		previous_URL:  "",
 	}
 

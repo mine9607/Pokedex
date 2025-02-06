@@ -17,6 +17,9 @@ type LocationsResponse struct {
 	} `json:"results"`
 }
 
+type ExploreAreaResponse struct {
+}
+
 func (c *Client) GetLocations(to_URL string) (LocationsResponse, error) {
 	url := ""
 	base_url := "https://pokeapi.co/api/v2/location-area"
@@ -47,6 +50,13 @@ func (c *Client) GetLocations(to_URL string) (LocationsResponse, error) {
 
 	return areas, nil
 
+}
+
+func (c *Client) GetAreaData(URL string) (ExploreAreaResponse, error) {
+	// similar to GetLocations but the url will add an {id or name} to the url
+	// this will be the second parameter passed to the CLI
+
+	return ExploreAreaResponse{}, nil
 }
 
 // The GET method assigns a get request to the client so the client can make a get requet giving access to the cache

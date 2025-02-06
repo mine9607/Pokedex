@@ -31,10 +31,11 @@ func StartRepl(in io.Reader, out io.Writer, config *config) {
 		}
 
 		command := words[0]
+		params := words[1:]
 
 		if cmd, ok := commands[command]; ok {
 			// call the callback function and print any errors that are returned
-			err := cmd.callback(config)
+			err := cmd.callback(config, params)
 			if err != nil {
 				fmt.Fprintf(out, "Error executing command %s: %v\n:", command, err)
 			}

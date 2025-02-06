@@ -20,3 +20,7 @@ func NewClient(timeout, cacheInterval time.Duration) Client {
 		},
 	}
 }
+
+func (c *Client) GetCache() *pokecache.Cache {
+	return c.cache
+}
