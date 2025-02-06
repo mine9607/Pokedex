@@ -48,14 +48,20 @@ func helpMessage(config *config) error {
 }
 
 // NOTE: need to add back in the update urls function call
-func getLocations(c *config) error {
-	data, err := c.pokeapiClient.GetLocations(c.next_URL)
+func getLocations(config *config) error {
+	data, err := config.pokeapiClient.GetLocations(config.next_URL)
 	if err != nil {
 		return err
 	}
+
+	UpdateConfigURLs(data.Previous, data.Next, config)
+
 	for _, area := range data.Results {
 		fmt.Println(area.Name)
 	}
+
+	fmt.Printf("PREV URL: %s\n", data.Previous)
+	fmt.Printf("NEXT URL: %s\n", data.Next)
 
 	return nil
 }
@@ -67,9 +73,22 @@ func printAreas() {
 func mapBack(config *config) error {
 	if config.previous_URL == "" {
 		fmt.Printf("You're on the first page\n")
-	} else {
-		config.pokeapiClient.GetLocations(config.previous_URL)
+		return nil
 	}
+
+	data, err := config.pokeapiClient.GetLocations(config.previous_URL)
+	if err != nil {
+		return err
+	}
+	UpdateConfigURLs(data.Previous, data.Next, config)
+
+	for _, area := range data.Results {
+		fmt.Println(area.Name)
+	}
+
+	fmt.Printf("PREV URL: %s\n", data.Previous)
+	fmt.Printf("NEXT URL: %s\n", data.Next)
+
 	return nil
 }
 

@@ -8,22 +8,22 @@ import (
 )
 
 type LocationsResponse struct {
-	Count    int     `json:"count"`
-	Next     *string `json:"next"`
-	Previous *string `json:"previous"`
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
 	Results  []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"results"`
 }
 
-func (c *Client) GetLocations(next_url string) (LocationsResponse, error) {
+func (c *Client) GetLocations(to_URL string) (LocationsResponse, error) {
 	url := ""
 	base_url := "https://pokeapi.co/api/v2/location-area"
 
 	//
-	if next_url != "" {
-		url = next_url
+	if to_URL != "" {
+		url = to_URL
 	} else {
 		url = base_url
 	}
