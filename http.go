@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/mine9607/pokedexcli/internal/pokecache"
 	"io"
 	"net/http"
 )
@@ -19,6 +20,8 @@ type LocationAreasType struct {
 }
 
 func GET(url string) (*LocationAreaGetResponse, error) {
+	// check cache
+
 	res, err := http.Get(url)
 
 	if err != nil {
