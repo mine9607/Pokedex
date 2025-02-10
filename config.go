@@ -7,6 +7,7 @@ type config struct {
 	next_URL      string
 	curr_URL      string
 	previous_URL  string
+	pokedex       pokeapi.Pokedex
 }
 
 func UpdateConfigURLs(prev_url string, next_url string, c *config, flag string) {

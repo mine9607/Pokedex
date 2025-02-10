@@ -70,6 +70,29 @@ type ExploreAreaResponse struct {
 	} `json:"pokemon_encounters"`
 }
 
+// The GET method assigns a get request to the client so the client can make a get requet giving access to the cache
+// func (c *Client) GET(url string) (LocationsResponse, error) {
+func (c *Client) GET(url string) ([]byte, error) {
+
+	res, err := http.Get(url)
+	if err != nil {
+		//return response, fmt.Errorf("error making request: %w", err)
+		return nil, fmt.Errorf("Error making request: %w", err)
+	}
+
+	defer res.Body.Close()
+
+	data, err := io.ReadAll(res.Body)
+
+	if err != nil {
+		//return response, fmt.Errorf("error reading response body: %w", err)
+		return nil, fmt.Errorf("Error reading the response body: %w", err)
+	}
+
+	c.cache.Add(url, data)
+	return data, nil
+}
+
 func (c *Client) GetLocations(to_URL string) (LocationsResponse, error) {
 	url := ""
 	base_url := "https://pokeapi.co/api/v2/location-area"
@@ -110,7 +133,6 @@ func (c *Client) ExploreArea(area_url string) (ExploreAreaResponse, error) {
 	// similar to GetLocations but the url will add an {id or name} to the url
 
 	// Check cache for existing url
-	// define the type struct to unmarshal data to
 	exploreArea := ExploreAreaResponse{}
 	if val, ok := c.cache.Get(area_url); ok {
 		fmt.Println("FOUND AREA IN CACHE!!!")
@@ -129,32 +151,30 @@ func (c *Client) ExploreArea(area_url string) (ExploreAreaResponse, error) {
 	}
 
 	if err := json.Unmarshal(data, &exploreArea); err != nil {
-		return exploreArea, nil
+		return exploreArea, fmt.Errorf("Error unmarshaling area data: %w", err)
 	}
 
 	return exploreArea, nil
 }
 
-// The GET method assigns a get request to the client so the client can make a get requet giving access to the cache
-// func (c *Client) GET(url string) (LocationsResponse, error) {
-func (c *Client) GET(url string) ([]byte, error) {
+func (c *Client) CatchPokemon(url string) (Pokemon, error) {
 
-	//	response := LocationsResponse{}
-	res, err := http.Get(url)
+	// check Pokedex
+	// note: add a check to see if pokemon in current area
+
+	pokemon := Pokemon{}
+
+	// make Get request
+	data, err := c.GET(url)
 	if err != nil {
-		//return response, fmt.Errorf("error making request: %w", err)
-		return nil, fmt.Errorf("error making request: %w", err)
+		return pokemon, fmt.Errorf("Error fetching pokemon stats: %w", err)
 	}
 
-	defer res.Body.Close()
-
-	data, err := io.ReadAll(res.Body)
-
-	if err != nil {
-		//return response, fmt.Errorf("error reading response body: %w", err)
-		return nil, fmt.Errorf("error reading the response body: %w", err)
+	// attempt to unmarshal data
+	if err := json.Unmarshal(data, &pokemon); err != nil {
+		return pokemon, fmt.Errorf("Error unmarshaling Pokemon stats: %w", err)
 	}
 
-	c.cache.Add(url, data)
-	return data, nil
+	// return fetched data
+	return pokemon, nil
 }
