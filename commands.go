@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 )
 
@@ -81,6 +82,11 @@ func printAreas() {
 
 }
 
+// NOTE: mapBack not showing FOUND IN CACHE AFTER INITIAL NAVIGATION BACK to first page
+// EXAMPLE: calling "map" "map" "mapb" doesn't show that the second page was found in Cache
+// NOTE: This is because the returned url contains the query params for setting the returned 20 locations
+// base_url: https://pokeapi.co/api/v2/location-area
+// returned base_url: https://pokeapi.co/api/v2/location-area?offset=0&limit=20
 func mapBack(config *config, params []string) error {
 	if config.previous_URL == "" {
 		fmt.Printf("You're on the first page\n")
@@ -112,23 +118,29 @@ func commandExit(config *config, params []string) error {
 }
 
 func exploreArea(config *config, params []string) error {
-	/* check cache
-	-> if cache data is not null:
-		1) check for area name in string(data.Results)
+	// check length of params to ensure area provided
+	if len(params) == 0 {
+		return fmt.Errorf("Error: Must provide an area to explore")
+	}
 
+	// NOTE: the split of the parameters is not allowing "-" in names
+	area := params[0]
 
+	// create the url to explore and pass to the clientMethd ExploreArea
+	base_url := "https://pokeapi.co/api/v2/location-area"
+	explore_url := base_url + "/" + area
 
-	*/
+	data, err := config.pokeapiClient.ExploreArea(explore_url)
+	if err != nil {
+		return err
+	}
 
-	// note: if we haven't called map then previous_URL = "" and next_URL = ""
-
-	// in GetAreaData we need to validate that previous_URL exists (so we can build the correct URL)
-
-	// in GetAreaData we need to validate the url path exists in cache and that there is
-	//url := config.previous_URL + params[0]
-	//data, err := config.pokeapiClient.GetAreaData(url)
+	for _, pokemon := range data.PokemonEncounters {
+		fmt.Println(pokemon.Pokemon.Name)
+	}
 
 	return nil
+
 }
 
 func checkCache(config *config, params []string) error {
@@ -140,4 +152,117 @@ func checkCache(config *config, params []string) error {
 		fmt.Println(data)
 	}
 	return nil
+}
+
+func catch(config *config, params []string) error {
+	if len(params) == 0 {
+		return fmt.Errorf("Error: Must include the name of a pokemon")
+	}
+
+	pokemon := params[0]
+	// create the endpoint
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", pokemon)
+
+	///NOTE: Consider adding this logic to the client
+	// include the following print statement
+	fmt.Printf("Throwing a Pokeball at %s", pokemon)
+
+	// Make a Get Request for the Pokemon's stats
+	data, err := config.pokeapiClient.CatchPokemon(url)
+	if err != nil {
+		return err
+	}
+
+	// Use the Pokemon's "base experience" to determine the chance of catching it
+	// assuming Mewtwo has highest base experience of 340
+	experience := data.base_experience
+	norm_exp := experience / 340
+	// Give the user a 'chance' to catch the Pokemon using the math/rand package
+	chance := rand.Int()
+
+	caught := false
+	if chance > norm_exp {
+		caught = true
+	}
+
+	if caught == true {
+		fmt.Printf("You caught %s!!!", pokemon)
+	} else {
+		fmt.Printf("%s got away!", pokemon)
+	}
+	// Once the Pokemon is caught, add it to the user's Pokedex, (map[string]Pokemon)
+
+	// Test the "catch" command manually
+
+	return nil
+}
+
+type Pokedex map[string]Pokemon
+type Pokemon struct {
+	ID             int    `json:"id"`
+	Name           string `json:"name"`
+	BaseExperience int    `json:"base_experience"`
+	Height         int    `json:"height"`
+	IsDefault      bool   `json:"is_default"`
+	Order          int    `json:"order"`
+	Weight         int    `json:"weight"`
+	Abilities      []struct {
+		IsHidden bool `json:"is_hidden"`
+		Slot     int  `json:"slot"`
+		Ability  struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"ability"`
+	} `json:"abilities"`
+	Forms []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"forms"`
+	GameIndices []struct {
+		GameIndex int `json:"game_index"`
+		Version   struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"version"`
+	} `json:"game_indices"`
+	HeldItems []struct {
+		Item struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"item"`
+	} `json:"held_items"`
+	LocationAreaEncounters string `json:"location_area_encounters"`
+	Moves                  []struct {
+		Move struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"move"`
+	} `json:"moves"`
+	Species struct {
+		Name       string `json:"name"`
+		URL        string `json:"url"`
+		Generation struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"generation"`
+	} `json:"species"`
+	Cries struct {
+		Latest string `json:"latest"`
+		Legacy string `json:"legacy"`
+	} `json:"cries"`
+	Stats []struct {
+		BaseStat int `json:"base_stat"`
+		Effort   int `json:"effort"`
+		Stat     struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"stat"`
+	} `json:"stats"`
+	Types []struct {
+		Slot int `json:"slot"`
+		Type struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"type"`
+	} `json:"types"`
 }
