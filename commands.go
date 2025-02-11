@@ -45,6 +45,11 @@ func init() {
 		description: "Attempt to catch a Pokemon in the area",
 		callback:    catchPokemon,
 	}
+	commands["inspect"] = cliCommand{
+		name:        "inspect",
+		description: "Show Pokemon stats",
+		callback:    inspectPokemon,
+	}
 	commands["cache"] = cliCommand{
 		name:        "cache",
 		description: "Returns current cache",
@@ -200,5 +205,39 @@ func checkCache(config *config, params []string) error {
 	if data, ok := cache.Get(url); ok {
 		fmt.Println(data)
 	}
+	return nil
+}
+
+func inspectPokemon(config *config, params []string) error {
+
+	if len(params) == 0 {
+		return fmt.Errorf("Must provide a pokemon name")
+	}
+
+	pokemon := params[0]
+
+	if _, ok := config.pokedex[pokemon]; !ok {
+		fmt.Printf("You have not caught %s", pokemon)
+		return nil
+	}
+
+	name := config.pokedex[pokemon].Name
+	height := config.pokedex[pokemon].Height
+	weight := config.pokedex[pokemon].Weight
+	stats := config.pokedex[pokemon].Stats
+	types := config.pokedex[pokemon].Types
+
+	fmt.Printf("Name: %s\n", name)
+	fmt.Printf("Height: %v\n", height)
+	fmt.Printf("Weight: %v\n", weight)
+	fmt.Println("Stats:")
+	for _, stat := range stats {
+		fmt.Printf("\t%s: %d\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, t := range types {
+		fmt.Printf("\t- %s\n", t.Type.Name)
+	}
+
 	return nil
 }
