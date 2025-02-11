@@ -50,6 +50,11 @@ func init() {
 		description: "Show Pokemon stats",
 		callback:    inspectPokemon,
 	}
+	commands["pokedex"] = cliCommand{
+		name:        "pokedex",
+		description: "Show caught Pokemon",
+		callback:    viewPokedex,
+	}
 	commands["cache"] = cliCommand{
 		name:        "cache",
 		description: "Returns current cache",
@@ -239,5 +244,14 @@ func inspectPokemon(config *config, params []string) error {
 		fmt.Printf("\t- %s\n", t.Type.Name)
 	}
 
+	return nil
+}
+
+func viewPokedex(config *config, params []string) error {
+
+	fmt.Println("Your Pokedex:")
+	for key := range config.pokedex {
+		fmt.Printf(" - %s", key)
+	}
 	return nil
 }
